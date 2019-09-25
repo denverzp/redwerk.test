@@ -11,24 +11,32 @@ Project URL: http://redwerk.test
     - Other setting can leave untouched.
 2. Set DNS entry in ```hosts``` file - ```192.168.56.100 redwerk.test```
 3. Start Vagrant by ```vagrant up``` -  and wait when virtual machine booted
-4. Check link ```public/storage``` - if this link dont work - need recreate it:
+4. Install project dependencies:
+   - logged in Vagrant - ```vagrant ssh```
+   - ```cd code/```
+   - ```composer install```
+5. Check link ```public/storage``` - if this link dont work - need recreate it:
     - logged in Vagrant - ```vagrant ssh```
     - ```cd code/```
     - ```rm public/storage```
     - ```php artisan storage:link```
-4. Open project URL in browser ```http://redwerk.test```
-
-## Database
-
-Project used SQLite DB.
-
-DB file placed on default location - ```database/database.sqlite```
+6. Open project URL in browser ```http://redwerk.test```
 
 ## Project details
-
-User image - can be set in "Profile".
 
 Default user credentials:
 
 - email: ```user@email.test```
 - password: ```pass```
+
+User image - can be set in "Profile", after authorization.
+
+## Database
+
+Project use SQLite DB.
+
+DB file placed on default location - ```database/database.sqlite```
+
+## Frontend
+
+Frontend based on Vue.js - and not need to rebuilded.
