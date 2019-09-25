@@ -11,6 +11,11 @@ Project URL: http://redwerk.test
     - Other setting can leave untouched.
 2. Set DNS entry in ```hosts``` file - ```192.168.56.100 redwerk.test```
 3. Start Vagrant by ```vagrant up``` -  and wait when virtual machine booted
+4. Check link ```public/storage``` - if this link dont work - need recreate it:
+    - logged in Vagrant - ```vagrant ssh```
+    - ```cd code/```
+    - ```rm public/storage```
+    - ```php artisan storage:link```
 4. Open project URL in browser ```http://redwerk.test```
 
 ## Database
