@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Advert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use App\Traits\stringFunction;
 
 /**
  * Class AdvertController
@@ -14,18 +16,12 @@ use Illuminate\Support\Facades\Auth;
  */
 class AdvertController extends Controller
 {
-    /**
-     * @var \Illuminate\Contracts\Auth\Authenticatable|null
-     */
-    private $user;
+
+    use stringFunction;
 
     public function __construct()
     {
-        $this->user = Auth::user();
-
-        if(!$this->user){
-            redirect()->route('/');
-        }
+        $this->middleware('auth')->except('index');
     }
 
     /**
@@ -33,29 +29,30 @@ class AdvertController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $limit = 10;
+
+        if ($request->has('limit')) {
+            $limit = (int)$request->input('limit');
+        }
+
         $adverts = Advert::where('user_id', '>', 0)
-            ->orderBy('created_at', 'asc')
-            ->take(10)
+            ->orderBy('created_at', 'desc')
+            ->take($limit)
             ->get();
 
+        foreach ($adverts as $advert_id => $advert) {
+            $adverts[$advert_id]['user'] = $advert->user;
+            $adverts[$advert_id]['description'] = $this->limitText($advert->description, 255);
+        }
+
         return ok([
-            'status' => 'succesds',
+            'status' => 'success',
             'data'   => [
                 'adverts' => $adverts
             ]
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        return forbidden();
     }
 
     /**
@@ -66,41 +63,39 @@ class AdvertController extends Controller
      */
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'title'       => 'required',
+            'description' => 'required',
+        ]);
 
-    }
+        if ($validator->fails()) {
+            return bad_request([
+                'status'  => 'error',
+                'message' => 'validation error',
+                'errors'  => $validator->errors()
+            ]);
+        }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param \App\Advert $advert
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Advert $advert)
-    {
-        return forbidden();
-    }
+        $user = Auth::user();
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param \App\Advert $advert
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Advert $advert)
-    {
-        return forbidden();
-    }
+        if ($user) {
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Advert $advert
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Advert $advert)
-    {
-        return forbidden();
+            Advert::create([
+                'user_id'     => $user->id,
+                'title'       => $request->input('title'),
+                'description' => $request->input('description'),
+            ]);
+
+            return ok([
+                'status' => 'success',
+            ]);
+        }
+
+        return bad_request([
+            'status'  => 'error',
+            'message' => 'Auth error',
+            'errors'  => ['cant find user']
+        ]);
     }
 
     /**
@@ -109,10 +104,25 @@ class AdvertController extends Controller
      * @param \App\Advert $advert
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Advert $advert)
+    public function destroy($id)
     {
-        $advert->delete();
+        $user = Auth::user();
 
-        return ok();
+        $advert = Advert::find($id);
+
+        if ($user && $advert && (int)$user->id === (int)$advert->user_id) {
+
+            $advert->delete();
+
+            return ok([
+                'status' => 'success',
+            ]);
+        }
+
+        return bad_request([
+            'status'  => 'error',
+            'message' => 'Got error',
+            'errors'  => ['cant find user or adert']
+        ]);
     }
 }

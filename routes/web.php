@@ -12,5 +12,11 @@
 */
 Auth::routes();
 
-Route::get('/', 'HomeController@index');
-Route::resource('/advert', 'AdvertController')->middleware('auth');
+Route::get('/', 'HomeController@index')->name('home');
+
+Route::get('/profile', 'ProfileController@index')->name('profile.index');
+Route::post('/profile', 'ProfileController@store')->name('profile.store');
+
+Route::get('/advert', 'AdvertController@index')->name('advert.index');
+Route::post('/advert', 'AdvertController@store')->name('advert.store');
+Route::post('/advert/{id}', 'AdvertController@destroy')->name('advert.destroy');
