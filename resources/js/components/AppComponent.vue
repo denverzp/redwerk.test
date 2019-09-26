@@ -2,8 +2,19 @@
     <div>
         <h1 class="mt-5">
             Adverts
-            <small class="float-right" v-if="app_data.user && app_data.user.id > 0">
-                <button class="btn btn-sm btn-outline-primary" id="add-new-advert" @click="addAdvert()">Add new</button>
+            <small class="float-right d-flex flex-row justify-content-center align-items-center">
+                <small class="limits mr-2 ml-2">
+                    <label for="limit">Items on page:</label>
+                    <select id="limit" @change="changeLimit()" v-model="itemsPerPage">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="15">15</option>
+                    </select>
+                </small>
+
+                <small class="mr-2 ml-2" v-if="app_data.user && app_data.user.id > 0">
+                    <button class="btn btn-sm btn-outline-primary" id="add-new-advert" @click="addAdvert()">Add new</button>
+                </small>
             </small>
         </h1>
         <div class="media text-muted pt-3 pb-3 d-flex flex-column flex-md-row border-top border-gray"
@@ -108,23 +119,30 @@
                 isSendDisabled:false,
                 currentAdvertAction: 'create',
                 currentAdvert: {},
-                currentAdvertErrors: {}
+                currentAdvertErrors: {},
+                itemsPerPage: 10
             }
         },
 
         methods: {
+            changeLimit(){
+                this.getList();
+            },
+
             getList() {
-                AdvertClient.list()
-                    .then((result) => {
-                        if (result.data.status === 'success') {
-                            this.adverts = result.data.data.adverts
-                        } else {
-                            console.error('Error: cant get advert data');
-                        }
-                    })
-                    .catch((err) => {
-                        console.error(err.toString())
-                    });
+                AdvertClient.list({
+                    limit: this.itemsPerPage
+                })
+                .then((result) => {
+                    if (result.data.status === 'success') {
+                        this.adverts = result.data.data.adverts
+                    } else {
+                        console.error('Error: cant get advert data');
+                    }
+                })
+                .catch((err) => {
+                    console.error(err.toString())
+                });
             },
 
             closeModal() {
@@ -175,30 +193,30 @@
                             title: this.currentAdvert.title,
                             description: this.currentAdvert.description,
                         })
-                            .then(() => {
-                                this.closeModal();
-                                this.getList();
-                                this.isSendDisabled = false;
-                            })
-                            .catch((err) => {
-                                console.error(err.toString())
-                            });
+                        .then(() => {
+                            this.closeModal();
+                            this.getList();
+                            this.isSendDisabled = false;
+                        })
+                        .catch((err) => {
+                            console.error(err.toString())
+                        });
 
                     } else if (this.currentAdvertAction === 'edit'){
 
                         AdvertClient.update({
-                                title: this.currentAdvert.title,
-                                description: this.currentAdvert.description,
-                                id: this.currentAdvert.id,
-                            })
-                            .then(() => {
-                                this.closeModal();
-                                this.getList();
-                                this.isSendDisabled = false;
-                            })
-                            .catch((err) => {
-                                console.error(err.toString())
-                            });
+                            title: this.currentAdvert.title,
+                            description: this.currentAdvert.description,
+                            id: this.currentAdvert.id,
+                        })
+                        .then(() => {
+                            this.closeModal();
+                            this.getList();
+                            this.isSendDisabled = false;
+                        })
+                        .catch((err) => {
+                            console.error(err.toString())
+                        });
                     }
 
                 } else {
@@ -235,6 +253,11 @@
 </script>
 
 <style>
+    .limits {
+        font-size: 1rem;
+        line-height: 0;
+    }
+
     .modal-mask {
         position: fixed;
         z-index: 9998;
