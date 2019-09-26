@@ -1948,6 +1948,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 
 var trottledDelay = 1000;
@@ -1961,6 +1966,7 @@ var trottledDelay = 1000;
       adverts: [],
       isModalShowed: false,
       isSendDisabled: false,
+      currentAdvertAction: 'create',
       currentAdvert: {},
       currentAdvertErrors: {}
     };
@@ -1989,6 +1995,7 @@ var trottledDelay = 1000;
         title: '',
         description: ''
       };
+      this.currentAdvertAction = 'create';
       this.currentAdvertErrors = {};
       this.isModalShowed = true;
     },
@@ -2015,27 +2022,57 @@ var trottledDelay = 1000;
       var _this2 = this;
 
       if (this.validateStore()) {
-        _api_client__WEBPACK_IMPORTED_MODULE_0__["default"].store({
-          title: this.currentAdvert.title,
-          description: this.currentAdvert.description
-        }).then(function () {
-          _this2.closeModal();
+        if (this.currentAdvertAction === 'create') {
+          _api_client__WEBPACK_IMPORTED_MODULE_0__["default"].store({
+            title: this.currentAdvert.title,
+            description: this.currentAdvert.description
+          }).then(function () {
+            _this2.closeModal();
 
-          _this2.getList();
+            _this2.getList();
 
-          _this2.isSendDisabled = false;
-        })["catch"](function (err) {
-          console.error(err.toString());
-        });
+            _this2.isSendDisabled = false;
+          })["catch"](function (err) {
+            console.error(err.toString());
+          });
+        } else if (this.currentAdvertAction === 'edit') {
+          _api_client__WEBPACK_IMPORTED_MODULE_0__["default"].update({
+            title: this.currentAdvert.title,
+            description: this.currentAdvert.description,
+            id: this.currentAdvert.id
+          }).then(function () {
+            _this2.closeModal();
+
+            _this2.getList();
+
+            _this2.isSendDisabled = false;
+          })["catch"](function (err) {
+            console.error(err.toString());
+          });
+        }
       } else {
         this.isSendDisabled = false;
       }
     },
-    deleteAdvert: function deleteAdvert(id) {
+    editAdvert: function editAdvert(id) {
       var _this3 = this;
 
+      _api_client__WEBPACK_IMPORTED_MODULE_0__["default"].show(id).then(function (result) {
+        if (result.data.status === 'success') {
+          _this3.currentAdvert = result.data.data.advert;
+          _this3.currentAdvertAction = 'edit';
+          _this3.currentAdvertErrors = {};
+          _this3.isModalShowed = true;
+        }
+      })["catch"](function (err) {
+        console.error(err.toString());
+      });
+    },
+    deleteAdvert: function deleteAdvert(id) {
+      var _this4 = this;
+
       _api_client__WEBPACK_IMPORTED_MODULE_0__["default"]["delete"](id).then(function () {
-        _this3.getList();
+        _this4.getList();
       })["catch"](function (err) {
         console.error(err.toString());
       });
@@ -20378,6 +20415,22 @@ var render = function() {
                       ? _c(
                           "button",
                           {
+                            staticClass: "btn btn-sm btn-outline-warning",
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.editAdvert(advert.id)
+                              }
+                            }
+                          },
+                          [_vm._v("Edit\n                    ")]
+                        )
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm.app_data.user && advert.user_id == _vm.app_data.user.id
+                      ? _c(
+                          "button",
+                          {
                             staticClass: "btn btn-sm btn-outline-danger",
                             attrs: { type: "button" },
                             on: {
@@ -20424,15 +20477,22 @@ var render = function() {
                         _c(
                           "div",
                           {
-                            staticClass: "modal-dialog",
+                            staticClass: "modal-dialog modal-lg",
                             attrs: { role: "document" }
                           },
                           [
                             _c("div", { staticClass: "modal-content" }, [
                               _c("div", { staticClass: "modal-header" }, [
-                                _c("h5", { staticClass: "modal-title" }, [
-                                  _vm._v("Add new advert")
-                                ]),
+                                _c("h5", {
+                                  staticClass: "modal-title",
+                                  domProps: {
+                                    textContent: _vm._s(
+                                      _vm.currentAdvertAction === "create"
+                                        ? "Add new advert"
+                                        : "Edit advert"
+                                    )
+                                  }
+                                }),
                                 _vm._v(" "),
                                 _c(
                                   "button",
@@ -20547,7 +20607,8 @@ var render = function() {
                                       attrs: {
                                         name: "description",
                                         id: "description",
-                                        placeholder: "Enter description"
+                                        placeholder: "Enter description",
+                                        rows: "6"
                                       },
                                       domProps: {
                                         value: _vm.currentAdvert.description
@@ -20603,22 +20664,25 @@ var render = function() {
                                   [_vm._v("Close ")]
                                 ),
                                 _vm._v(" "),
-                                _c(
-                                  "button",
-                                  {
-                                    staticClass: "btn btn-primary",
-                                    attrs: {
-                                      type: "button",
-                                      disabled: _vm.isSendDisabled
-                                    },
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.trottledStoreAdvert()
-                                      }
-                                    }
+                                _c("button", {
+                                  staticClass: "btn btn-primary",
+                                  attrs: {
+                                    type: "button",
+                                    disabled: _vm.isSendDisabled
                                   },
-                                  [_vm._v("Store")]
-                                )
+                                  domProps: {
+                                    textContent: _vm._s(
+                                      _vm.currentAdvertAction === "create"
+                                        ? "Store"
+                                        : "Update"
+                                    )
+                                  },
+                                  on: {
+                                    click: function($event) {
+                                      return _vm.trottledStoreAdvert()
+                                    }
+                                  }
+                                })
                               ])
                             ])
                           ]
@@ -32809,11 +32873,21 @@ var ENDPOINT_URL = 'advert';
       params: data
     });
   },
+  show: function show(id) {
+    return axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("".concat(ENDPOINT_URL, "/").concat(id));
+  },
   store: function store(data) {
     return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("".concat(ENDPOINT_URL), data);
   },
+  update: function update(data) {
+    return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("".concat(ENDPOINT_URL, "/update"), data);
+  },
   "delete": function _delete(id) {
-    return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("".concat(ENDPOINT_URL, "/").concat(id));
+    return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("".concat(ENDPOINT_URL, "/destroy"), {
+      params: {
+        id: id
+      }
+    });
   }
 });
 

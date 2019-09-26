@@ -1,0 +1,28 @@
+ip: 192.168.56.100
+memory: 2048
+cpus: 2
+provider: virtualbox
+
+authorize: C:\Users\Ice\.ssh\homestead.pub
+
+keys:
+  - C:\Users\Ice\.ssh\homestead
+
+folders:
+    - map: 'E:\DEV\NetBeansProjects\redwerk_test'
+      to: /home/vagrant/code
+
+sites:
+    - map: redwerk.test
+      to: /home/vagrant/code/public
+
+databases:
+    - homestead
+    
+features:
+    - mariadb: false
+    - ohmyzsh: false
+    - webdriver: false
+
+name: redwerk.test
+hostname: redwerk.test

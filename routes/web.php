@@ -16,7 +16,10 @@ Route::get('/', 'HomeController@index')->name('home');
 
 Route::get('/profile', 'ProfileController@index')->name('profile.index');
 Route::post('/profile', 'ProfileController@store')->name('profile.store');
+Route::post('/profile/image', 'ProfileController@image')->name('profile.image');
 
 Route::get('/advert', 'AdvertController@index')->name('advert.index');
+Route::get('/advert/{id}', 'AdvertController@show')->name('advert.show');
 Route::post('/advert', 'AdvertController@store')->name('advert.store');
-Route::post('/advert/{id}', 'AdvertController@destroy')->name('advert.destroy');
+Route::post('/advert/update', 'AdvertController@update')->name('advert.update');
+Route::post('/advert/destroy', 'AdvertController@destroy')->name('advert.destroy');

@@ -35,7 +35,10 @@
 
             <div class="form-group">
                 @if($user->image)
-                    <img src="{{ $user->image }}" alt="" style="width: 200px; height: auto">
+                    <div class="d-flex flex-row justify-content-between align-items-center">
+                        <img src="{{ $user->image }}" alt="" style="width: 200px; height: auto">
+                        <button type="button" class="btn btn-sm btn-danger" id="remove-image">X</button>
+                    </div>
                 @else     
                 <label for="image">Image</label>
                 <input type="file" class="form-control-file" id="image" name="image">
@@ -62,5 +65,30 @@
                 <button type="submit" class="btn btn-outline-success">Update profile</button>
             </div>
         </form>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                (function($){
+                    $('#remove-image').on('click', function(){
+
+                        var token = document.head.querySelector('meta[name="csrf-token"]');
+
+                        $.ajax({
+                            url: '/profile/image',
+                            type: 'post',
+                            headers: {
+                                'X-CSRF-TOKEN': token.content,
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .done(function () {
+                            location.reload();
+                        })
+                        .fail(function (xhr, errMsg) {
+                            console.error(errMsg)
+                        });
+                    });
+                })(jQuery);
+            });
+        </script>
     </div>
 @endsection

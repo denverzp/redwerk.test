@@ -15,7 +15,9 @@ let ENDPOINT_URL = 'advert';
 
 export default {
     list: (data = null) => axios.get(`${ENDPOINT_URL}`, {params: data}),
+    show: (id) => axios.get(`${ENDPOINT_URL}/${id}`),
     store: (data) => axios.post(`${ENDPOINT_URL}`, data),
-    delete: (id) => axios.post(`${ENDPOINT_URL}/${id}`),
+    update: (data) => axios.post(`${ENDPOINT_URL}/update`, data),
+    delete: (id) => axios.post(`${ENDPOINT_URL}/destroy`, {params: {id: id}}),
 };
 

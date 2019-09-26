@@ -74,4 +74,22 @@ class ProfileController extends Controller
 
         return redirect()->route('profile.index');
     }
+
+    public function image()
+    {
+        $user = Auth::user();
+
+        if($user && $user->image){
+
+            unlink(public_path($user->image));
+
+            $user->image = '';
+
+            $user->save();
+
+            return ok();
+        }
+
+        return bad_request();
+    }
 }

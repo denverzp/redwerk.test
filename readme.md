@@ -31,6 +31,8 @@ Default user credentials:
 
 User image - can be set in "Profile", after authorization.
 
+Add. update and delete adverts - allow only after authorization.
+
 ## Database
 
 Project use SQLite DB.

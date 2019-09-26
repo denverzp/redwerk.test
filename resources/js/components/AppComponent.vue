@@ -22,6 +22,10 @@
                         <span v-text="advert.created_at"></span>
                     </div>
                     <div class="float-right">
+                        <button type="button" class="btn btn-sm btn-outline-warning"
+                                @click="editAdvert(advert.id)"
+                                v-if="app_data.user && advert.user_id == app_data.user.id ">Edit
+                        </button>
                         <button type="button" @click="deleteAdvert(advert.id)" class="btn btn-sm btn-outline-danger"
                                 v-if="app_data.user && advert.user_id == app_data.user.id ">Delete
                         </button>
@@ -35,10 +39,10 @@
                 <transition name="modal">
                     <div class="modal-mask">
                         <div class="modal-wrapper" tabindex="-1" role="dialog">
-                            <div class="modal-dialog" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Add new advert</h5>
+                                        <h5 class="modal-title" v-text="currentAdvertAction === 'create' ? 'Add new advert' : 'Edit advert'"></h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                                                 @click="closeModal()">
                                             <span aria-hidden="true">&times;</span>
@@ -59,7 +63,7 @@
                                             <div class="form-group">
                                                 <label for="description">Description</label>
                                                 <textarea name="description" id="description" class="form-control"
-                                                          placeholder="Enter description"
+                                                          placeholder="Enter description" rows="6"
                                                           :class="{'is-invalid': currentAdvertErrors.description}"
                                                           v-model="currentAdvert.description"></textarea>
                                                 <div class="invalid-feedback" v-show="currentAdvertErrors.description"
@@ -71,7 +75,8 @@
                                         <button type="button" class="btn btn-secondary" @click="closeModal()">Close </button>
                                         <button type="button" class="btn btn-primary"
                                                 :disabled="isSendDisabled"
-                                                @click="trottledStoreAdvert()">Store</button>
+                                                @click="trottledStoreAdvert()"
+                                                v-text="currentAdvertAction === 'create' ? 'Store' : 'Update'"></button>
                                     </div>
                                 </div>
                             </div>
@@ -101,6 +106,7 @@
                 adverts: [],
                 isModalShowed: false,
                 isSendDisabled:false,
+                currentAdvertAction: 'create',
                 currentAdvert: {},
                 currentAdvertErrors: {}
             }
@@ -132,6 +138,7 @@
                     title: '',
                     description: '',
                 };
+                this.currentAdvertAction = 'create';
                 this.currentAdvertErrors = {};
                 this.isModalShowed = true;
             },
@@ -161,22 +168,57 @@
 
             storeAdvert() {
                 if (this.validateStore()) {
-                    AdvertClient.store({
-                        title: this.currentAdvert.title,
-                        description: this.currentAdvert.description,
-                    })
-                        .then(() => {
-                            this.closeModal();
-                            this.getList();
-                            this.isSendDisabled = false;
+
+                    if(this.currentAdvertAction === 'create'){
+
+                        AdvertClient.store({
+                            title: this.currentAdvert.title,
+                            description: this.currentAdvert.description,
                         })
-                        .catch((err) => {
-                            console.error(err.toString())
-                        });
+                            .then(() => {
+                                this.closeModal();
+                                this.getList();
+                                this.isSendDisabled = false;
+                            })
+                            .catch((err) => {
+                                console.error(err.toString())
+                            });
+
+                    } else if (this.currentAdvertAction === 'edit'){
+
+                        AdvertClient.update({
+                                title: this.currentAdvert.title,
+                                description: this.currentAdvert.description,
+                                id: this.currentAdvert.id,
+                            })
+                            .then(() => {
+                                this.closeModal();
+                                this.getList();
+                                this.isSendDisabled = false;
+                            })
+                            .catch((err) => {
+                                console.error(err.toString())
+                            });
+                    }
 
                 } else {
                     this.isSendDisabled = false;
                 }
+            },
+
+            editAdvert(id) {
+                AdvertClient.show(id)
+                    .then((result) => {
+                        if(result.data.status === 'success'){
+                            this.currentAdvert = result.data.data.advert;
+                            this.currentAdvertAction = 'edit';
+                            this.currentAdvertErrors = {};
+                            this.isModalShowed = true;
+                        }
+                    })
+                    .catch((err) => {
+                        console.error(err.toString())
+                    });
             },
 
             deleteAdvert(id) {

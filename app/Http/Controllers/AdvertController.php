@@ -99,13 +99,98 @@ class AdvertController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $user = Auth::user();
+
+        $advert = Advert::find($id);
+
+        if ($user && $advert && (int)$user->id === (int)$advert->user_id) {
+
+            return ok([
+                'status' => 'success',
+                'data' => [
+                    'advert' => $advert
+                ]
+            ]);
+        }
+
+        return bad_request([
+            'status'  => 'error',
+            'message' => 'Got error',
+            'errors'  => ['cant find user or adert']
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'title'       => 'required',
+            'description' => 'required',
+            'id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return bad_request([
+                'status'  => 'error',
+                'message' => 'validation error',
+                'errors'  => $validator->errors()
+            ]);
+        }
+
+        $id = (int)$request->input('id');
+
+        $advert = Advert::find($id);
+
+        $user = Auth::user();
+
+        if ($user && $advert && (int)$user->id === (int)$advert->user_id) {
+
+            $advert->title       = $request->input('title');
+            $advert->description = $request->input('description');
+
+            $advert->save();
+
+            return ok([
+                'status' => 'success',
+            ]);
+        }
+
+        return bad_request([
+            'status'  => 'error',
+            'message' => 'Got error',
+            'errors'  => ['cant find user or advert']
+        ]);
+    }
+
+    /**
      * Remove the specified resource from storage.
      *
      * @param \App\Advert $advert
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
+        $id = (int)$request->input('id');
+
+        if(!$id){
+            return bad_request([
+                'status'  => 'error',
+                'message' => 'not send advert id',
+                'errors'  => ['not send advert id']
+            ]);
+        }
+
         $user = Auth::user();
 
         $advert = Advert::find($id);
