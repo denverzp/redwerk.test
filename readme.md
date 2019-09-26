@@ -11,7 +11,7 @@ Project URL: http://redwerk.test
     - Other setting can leave untouched.
 2. Set DNS entry in ```hosts``` file - ```192.168.56.100 redwerk.test```
 3. Start Vagrant by ```vagrant up``` -  and wait when virtual machine booted
-4. Install project dependencies:
+4. (Optional) Re-Install project dependencies:
    - logged in Vagrant - ```vagrant ssh```
    - ```cd code/```
    - ```composer install```
