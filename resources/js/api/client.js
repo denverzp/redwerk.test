@@ -18,6 +18,6 @@ export default {
     show: (id) => axios.get(`${ENDPOINT_URL}/${id}`),
     store: (data) => axios.post(`${ENDPOINT_URL}`, data),
     update: (data) => axios.post(`${ENDPOINT_URL}/update`, data),
-    delete: (id) => axios.post(`${ENDPOINT_URL}/destroy`, {params: {id: id}}),
+    delete: (id) => axios.post(`${ENDPOINT_URL}/destroy`, {id: id}),
 };
 
