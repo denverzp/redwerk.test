@@ -62,8 +62,6 @@ block="server {
 
     sendfile off;
 
-    client_max_body_size 100m;
-
     # DEV
     location ~ ^/(app_dev|app_test|config)\.php(/|\$) {
         fastcgi_split_path_info ^(.+\.php)(/.*)\$;
@@ -75,6 +73,9 @@ block="server {
         fastcgi_intercept_errors off;
         fastcgi_buffer_size 16k;
         fastcgi_buffers 4 16k;
+        fastcgi_connect_timeout 300;
+        fastcgi_send_timeout 300;
+        fastcgi_read_timeout 300;        
     }
 
     # PROD
